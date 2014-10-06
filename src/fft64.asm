@@ -1267,24 +1267,6 @@ Sqr_Done:
 ;
 ;*****************************************
 ;
-/*
-Set_Active_Display:			;Set righthand edge (Column) of active region (lefthand will be 0 column)
-					;In:
-					;Out: OLED
-	push	temp
-
-	ldi	temp,0x21		;Set Active width of Disply
-	rcall	OLED_cnt
-	ldi	temp,0x00		;Left Column
-	rcall	OLED_cnt
-	ldi	temp,OLED_Right_Edge		;Right Column
-	rcall	OLED_cnt
-
-	sbi	portd,OLED_SCE	;Chip Enable, Disable
-	pop	temp
-	ret
-*/
-;
 ;
 Clear_Display:			;Clear (Fill with 0's) Display, work for full screen Horizontal or Vertical Addresing Mode
 					;In:
@@ -1559,82 +1541,6 @@ OPB_LineB_lp:
 ;
 ;*****************************************
 ;
-/*
-OLED_Initialize_SSD1308:		;Inicialize OLED
-
-	push	temp
-	cbi	portd,OLED_RES	;Reset
-	rcall	Delay15ms
-	sbi	portd,OLED_RES
-	rcall	Delay15ms
-
-	;Derived from intilization sequence in data sheet
-	ldi	temp,0xae		;Display Off (1010 111x)
-	rcall	OLED_cnt
-
-	ldi	temp,0xa1		;(Hardware) Segment Remap (1010 000x)
-	rcall	OLED_cnt
-
-	ldi	temp,0xda		;(Hardware) Set COM Pins Hardware Config (1101 1010)
-	rcall	OLED_cnt
-	ldi	temp,0x12		;2nd byte (00xx 0010)
-	rcall	OLED_cnt
-
-	ldi	temp,0xc8		;(Harware) Set COM Output Scan Direction
-	rcall	OLED_cnt
-
-	ldi	temp,0xa8		;Multiplex Ratio Mode (1010 1000)
-	rcall	OLED_cnt
-	ldi	temp,0x3f		;2nd byte (--xx xxxx) 63 (Default)
-	rcall	OLED_cnt
-
-	ldi	temp,0xd5		;Display Divide Ratio/Osc (1101 0011)
-	rcall	OLED_cnt
-	ldi	temp,0x80		;2nd Byte (xxxx xxxx) Ratio
-	rcall	OLED_cnt
-
-	ldi	temp,0x81		;Contrast Control (1000 0001)
-	rcall	OLED_cnt
-	ldi	temp,Contrast		;2nd byte (xxxx xxxx)
-	rcall	OLED_cnt
-
-	ldi	temp,0xd9		;Set Precharge Period (1101 1001)
-	rcall	OLED_cnt
-	ldi	temp,0x21		;2nd byte (xxxx xxxx)
-	rcall	OLED_cnt
-
-	ldi	temp,0x20		;Memory Addressing Mode (0010 0000)
-	rcall	OLED_cnt
-	ldi	temp,0x01		;2nd byte (0000 00xx), Vertical Mode
-	rcall	OLED_cnt
-
-	ldi	temp,0xdb		;VCOM Deselect Level Mode (1101 1011)
-	rcall	OLED_cnt
-	ldi	temp,0x30		;2nd byte (0xxx 0000), 0.83v x Vcc
-	rcall	OLED_cnt
-
-	ldi	temp,0xad		;I Ref Selection (1010 1101)
-	rcall	OLED_cnt
-	ldi	temp,0x00		;2nd byte (000x 0000), External
-	rcall	OLED_cnt
-
-	ldi	temp,0xa4		;Entire Display On (1010 010x) ???
-	rcall	OLED_cnt
-
-	ldi	temp,0xa6		;Set Normal/Inverse (1010 011x), Normal
-	rcall	OLED_cnt
-
-	ldi	temp,0xaf		;Display On (101011x)
-	rcall	OLED_cnt
-
-
-
-	sbi	portd,OLED_SCE	;Chip Enable, Disable
-
-	pop	temp
-	ret
-*/
-;
 ;
 ;** The 1.3" OLED mounted upside down
 OLED_Initialize_SSD1306:			;Inicialize OLED
@@ -1877,8 +1783,9 @@ end:
 	.org	(end & 0xff00) + 0x100
 tables:
 
-//48 (3/4) of a 64 sample sinewave
-SineWave64: 	.dw	      0,   1606,   3196,   4756,   6270,   7723,   9102,  10394	;Must be 0x100 boundery
+; 48 samples (3/4) of a 64 sample sinewave
+SineWave64:
+	 	.dw	      0,   1606,   3196,   4756,   6270,   7723,   9102,  10394	;Must be 0x100 boundery
 		.dw	  11585,  12665,  13622,  14449,  15136,  15678,  16069,  16305
 		.dw	  16384,  16305,  16069,  15678,  15136,  14449,  13622,  12665
 		.dw	  11585,  10394,   9102,   7723,   6270,   4756,   3196,   1606
