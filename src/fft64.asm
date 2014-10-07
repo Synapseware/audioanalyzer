@@ -83,97 +83,46 @@
 .equ	Y_Max			=63		;OLED Max Y
 
 
-;
+; ================================================================================================
 ;******************************************
 ;*                                        *
 ;*            Start/Init                  *
 ;*                                        *
 ;******************************************
-;
-
-
 .CSEG
-	.org	0000
-	rjmp	Reset
-
-	.org	INT0addr	; External Interrupt Request 0
-	reti
-
-	.org	INT1addr	; External Interrupt Request 1
-	reti
-
-	.org	PCI0addr	; Pin Change Interrupt Request 0
-	reti
-
-	.org	PCI1addr	; Pin Change Interrupt Request 0
-	reti
-
-	.org	PCI2addr	; Pin Change Interrupt Request 1
-	reti
-
-	.org	WDTaddr	; Watchdog Time-out Interrupt
-	reti
-
-	.org	OC2Aaddr	; Timer/Counter2 Compare Match A
-	reti
-
-	.org	OC2Baddr	; Timer/Counter2 Compare Match A
-	reti
-
-	.org	OVF2addr	; Timer/Counter2 Overflow
-	reti
-
-	.org	ICP1addr	; Timer/Counter1 Capture Event
-	reti
-
-	.org	OC1Aaddr	; Timer/Counter1 Compare Match A
-	reti
-
-	.org	OC1Baddr	; Timer/Counter1 Compare Match B
-	reti
-
-	.org	OVF1addr	; Timer/Counter1 Overflow
-	reti
-
-	.org	OC0Aaddr	; TimerCounter0 Compare Match A
-	reti
-
-	.org	OC0Baddr	; TimerCounter0 Compare Match B
-	reti
-
-	.org	OVF0addr	; Timer/Couner0 Overflow
-	reti
-
-	.org	SPIaddr	; SPI Serial Transfer Complete
-	reti
-
-	.org	URXCaddr	; USART Rx Complete
-	reti
-
-	.org	UDREaddr	; USART, Data Register Empty
-	reti
-
-	.org	UTXCaddr	; USART Tx Complete
-	reti
-
-	.org	ADCCaddr	; ADC Conversion Complete
-	rjmp	ADC_Int
-
-	.org	ERDYaddr	; EEPROM Ready
-	reti
-
-	.org	ACIaddr	; Analog Comparator
-	reti
-
-	.org	TWIaddr	; Two-wire Serial Interface
-	reti
-
-	.org	SPMRaddr	; Store Program Memory Read
-	reti
+	.org	$000
+	rjmp	Reset		; RESET			0x000	; Reset Handler
+	reti				; EXT_INT0		0x001	; IRQ0 Handler 
+	reti				; EXT_INT1		0x002	; IRQ1 Handler 
+	reti				; PCINT0		0x003	; PCINT0 Handler 
+	reti				; PCINT1		0x004	; PCINT1 Handler 
+	reti				; PCINT2		0x005	; PCINT2 Handler 
+	reti				; WDT			0x006	; Watchdog Timer Handler 
+	reti				; TIM2_COMPA	0x007	; Timer2 Compare A Handler 
+	reti				; TIM2_COMPB	0X008	; Timer2 Compare B Handler 
+	reti				; TIM2_OVF		0x009	; Timer2 Overflow Handler 
+	reti				; TIM1_CAPT	0	x00A	; Timer1 Capture Handler 
+	reti				; TIM1_COMPA	0x00B	; Timer1 Compare A Handler 
+	reti				; TIM1_COMPB	0x00C	; Timer1 Compare B Handler 
+	reti				; TIM1_OVF		0x00D	; Timer1 Overflow Handler 
+	reti				; TIM0_COMPA	0x00E	; Timer0 Compare A Handler 
+	reti				; TIM0_COMPB	0x00F	; Timer0 Compare B Handler 
+	reti				; TIM0_OVF		0x010	; Timer0 Overflow Handler 
+	reti				; SPI_STC		0x011	; SPI Transfer Complete Handler 
+	reti				; USART_RXC		0x012	; USART, RX Complete Handler 
+	reti				; USART_UDRE	0x013	; USART, UDR Empty Handler 
+	reti				; USART_TXC		0x014	; USART, TX Complete Handler 
+	rjmp	ADC_Int		; ADC			0x015	; ADC Conversion Complete Handler 
+	reti				; EE_RDY		0x016	; EEPROM Ready Handler 
+	reti				; ANA_COMP		0x017	; Analog Comparator Handler 
+	reti				; TWI			0x018	; 2-wire Serial Interface Handler 
+	reti				; SPM_RDY		0x019	; Store Program Memory Ready Handler 
 
 
 
-
+; ================================================================================================
+; Reset ISR
+; ================================================================================================
 Reset:	ldi	temp,high(RAMEND)	;Set stack pointer
 	out	SPH,temp
 	ldi	temp,low(RAMEND)
@@ -274,7 +223,7 @@ Reset:	ldi	temp,high(RAMEND)	;Set stack pointer
 
 	sei			;Global Int enable
 
-;
+; ================================================================================================
 ;*****************************************
 ;
 ;  Main program
@@ -328,14 +277,13 @@ FFT_Cnt:
 	rcall	Process_Average
 	rjmp	FFT_Cycle
 
-;
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  FFT test
 ;
 ;*****************************************
-;
-;
 Fill_Peaks:				;Prefill Peak values in FFT_Data_Display
 					;In:
 					;Out: FFT_Data_Display
@@ -584,13 +532,14 @@ PA_X:	pop	temp
 	pop	Xl
 	pop	Xh
 	ret
-;
+
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  FFT
 ;
 ;*****************************************
-;
 FFT_Fixed64OE:		;FFT 64 Fixpoint, Odd Even Decomposition (Ver 26/5/2013)
 				;By Craig Webster (IXIBA)
 				;Derived from
@@ -1113,14 +1062,15 @@ OD_Final:
 	st	Y,r25
 
 	ret
-;
+
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  Maths
 ;
 ;*****************************************
-;
-Sqrt:			;PIC/Normal Hybrid Sqroot N32 to N16 V3 (IXIBA Ver 18/9/2013)
+Sqrt:		;PIC/Normal Hybrid Sqroot N32 to N16 V3 (IXIBA Ver 18/9/2013)
 			;From PIC App Note TB040, Wikipedia
 			;In: r15:r14:r13:r12
 			;Out: r13:r12
@@ -1260,14 +1210,13 @@ Sqr_Done:
 	pop	r0
 	ret
 
-;
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  Oled Stuff
 ;
 ;*****************************************
-;
-;
 Clear_Display:			;Clear (Fill with 0's) Display, work for full screen Horizontal or Vertical Addresing Mode
 					;In:
 					;Out: OLED
@@ -1533,15 +1482,13 @@ OPB_LineB_lp:
 	pop	Zh
 	ret
 
-;
-;
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  OLED Interface
 ;
 ;*****************************************
-;
-;
 ;** The 1.3" OLED mounted upside down
 OLED_Initialize_SSD1306:			;Inicialize OLED
 	push	temp
@@ -1679,14 +1626,14 @@ Del_L2:dec	temp
 	pop	temp1
 	pop	temp
 	ret	
-;
-;
+
+
+; ================================================================================================
 ;*****************************************
 ;
 ;  Interupts
 ;
 ;*****************************************
-;	
 ADC_Int:
 	sbrs	flags,ADCFillAorB	;Data to A or B buffer
 	rjmp	ADC_FillB
